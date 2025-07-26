@@ -1,0 +1,15 @@
+apiVersion: multitenancy-management.example.com/v1
+kind: TenantInfo
+metadata:
+  labels:
+    app.kubernetes.io/name: multitenancy-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: tenantinfo-sample
+spec:
+  tenants:
+    - tenantID: tenant-001
+      webserviceURL: https://service.tenant-001.example.com
+    - tenantID: tenant-002
+      webserviceURL: https://service.tenant-002.example.com
+    - tenantID: bwi
+      webserviceURL: https://service.bwi.com

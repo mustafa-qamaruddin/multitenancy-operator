@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- multitenancy-management_v1_tenantinfo.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

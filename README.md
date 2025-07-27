@@ -19,48 +19,58 @@ This operator manages multitenant configurations using a Kubernetes-native appro
 
 Designed as a lightweight and extensible example, this project demonstrates the reconciliation pattern and how it can be used to bridge declarative specifications with automated infrastructure behavior. Although it currently focuses on `ConfigMaps`, the architecture is ready to be extended to manage Deployments, Services, Secrets, database provisioning, routing rules, or any other resources that need to be tenant-aware.
 
-This project is ideal for learning how to build custom operators using Kubebuilder and the controller-runtime framework.
+This project demonstrates how to build custom operators using Kubebuilder and the controller-runtime framework.
 
 ## Setup
 
-# Initialize the Kubebuilder project with your chosen domain and repo path
+This section initializes the project, generates boilerplate code, and installs the custom resource definitions (CRDs) into the cluster. It's required only once when bootstrapping or resetting the operator project.
+
+```shell
+# Initialize the operator project with your domain and module path
 kubebuilder init --domain example.com --repo github.com/mustafa-qamaruddin/multitenancy-operator
 
-# Create a new API group/version/kind (CRD: TenantInfo under multitenancy-management.example.com/v1)
+# Create a new API with group/version/kind -> TenantInfo CRD
 kubebuilder create api --group multitenancy-management --version v1 --kind TenantInfo
 
-# Generate boilerplate code (types, controller, etc.)
+# Generate Go code for the API types and deepcopy functions
 make generate
 
-# Generate CRD manifests and RBAC configurations
+# Generate CRD YAMLs and RBAC permissions from annotations
 make manifests
 
-# Install the CRD into the Kubernetes cluster
+# Apply the generated CRDs and RBAC roles to your cluster
 make install
-
+```
 
 ## Run Demo
 
-# Start the Kubernetes dashboard (useful for watching resources in Minikube)
+This section runs the operator locally and applies a sample `TenantInfo` custom resource. You can observe the operator creating `ConfigMaps` in response. The dashboard is optional but useful for visual inspection.
+
+```shell
+# Open the Kubernetes dashboard (optional but helpful for debugging)
 minikube dashboard
 
-# Run the operator locally (will watch TenantInfo resources and reconcile them)
+# Run the operator controller locally, watching your cluster for CR changes
 make run
 
-# Apply the sample custom resource defined in config/samples/
+# Apply the sample TenantInfo CR to trigger reconciliation logic
 kubectl apply -k config/samples
 
-# View all created TenantInfo custom resources across namespaces
+# List all TenantInfo resources across all namespaces
 kubectl get tenantinfoes -A
 
-# Delete the sample custom resource to test cleanup logic
+# Delete the sample to test if associated resources (like ConfigMaps) are cleaned up
 kubectl delete tenantinfoes/tenantinfo-sample
-
+```
 
 ## Cleanup
 
-# Uninstall the CRDs and related cluster resources installed by the operator
+This section uninstalls all the CRDs and RBAC settings that were installed during the setup. Run this to clean your cluster after testing.
+
+```shell
+# Remove all CRDs and associated RBAC resources created by the operator
 make uninstall
+```
 
 ## KubeBuilder Default README.md
 

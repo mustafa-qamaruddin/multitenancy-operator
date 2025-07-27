@@ -114,12 +114,23 @@ func (r *TenantInfoReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	// Step 2: List all ConfigMaps owned by this TenantInfo and delete the ones no longer needed
 	var childCMs corev1.ConfigMapList
-	if err := r.List(ctx, &childCMs, client.InNamespace(req.Namespace), client.MatchingFields{"metadata.ownerReferences.uid": string(tenantInfo.UID)}); err != nil {
+	if err := r.List(ctx, &childCMs, client.InNamespace(req.Namespace)); err != nil {
 		log.Error(err, "Failed to list child ConfigMaps")
 		return ctrl.Result{}, err
 	}
 
+	// Manually filter by ownerReference UID since fake client doesn't support field selectors
+	var filteredChildCMs []corev1.ConfigMap
 	for _, cm := range childCMs.Items {
+		for _, ref := range cm.OwnerReferences {
+			if ref.UID == tenantInfo.UID {
+				filteredChildCMs = append(filteredChildCMs, cm)
+				break
+			}
+		}
+	}
+
+	for _, cm := range filteredChildCMs {
 		tenantID := strings.TrimPrefix(cm.Name, "tenant-")
 		tenantID = strings.TrimSuffix(tenantID, "-config")
 		if _, exists := currentTenantIDs[tenantID]; !exists {

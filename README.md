@@ -72,6 +72,25 @@ This section uninstalls all the CRDs and RBAC settings that were installed durin
 make uninstall
 ```
 
+## Tests
+
+This section shows how to run the automated tests 
+
+```shell
+# To ensure the binaries are properly set up
+make setup-envtest
+
+# For e2e test create a node in the cluster
+brew install kind
+kind create cluster --name kind
+
+# Runs all global tests
+go test ./...
+
+# Runs only the controller tests
+go test ./internal/controller/...
+```
+
 ## KubeBuilder Default README.md
 
 ## Getting Started

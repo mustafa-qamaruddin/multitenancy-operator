@@ -52,6 +52,18 @@ var _ = Describe("TenantInfo Controller", func() {
 						Namespace: "default",
 					},
 					// TODO(user): Specify other spec details if needed.
+					Spec: multitenancymanagementv1.TenantInfoSpec{
+						Tenants: []multitenancymanagementv1.Tenant{
+							{
+								TenantID:      "tenant.001",
+								WebserviceURL: "https://webservice.tenant-001.com",
+							},
+							{
+								TenantID:      "tenant.002",
+								WebserviceURL: "https://webservice.tenant-002.com",
+							},
+						},
+					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}

@@ -7,9 +7,7 @@ metadata:
   name: tenantinfo-sample
 spec:
   tenants:
-    - tenantID: tenant-001
-      webserviceURL: https://service.tenant-001.example.com
-    - tenantID: tenant-002
-      webserviceURL: https://service.tenant-002.example.com
-    - tenantID: tenant-009
-      webserviceURL: https://service.tenant-009.example.com
+    - tenantID: tenant-888
+      webserviceURL: https://service.tenant-888.example.com
+    - tenantID: tenant-777
+      webserviceURL: https://service.tenant-777.example.com

@@ -12,6 +12,7 @@ make run
 kubectl apply -k config/samples
 
 kubectl get tenantinfoes -A
+kubectl delete customresourcedefinition tenantinfoes.multitenancy-management.example.com
 kubectl delete tenantinfoes/tenantinfo-sample
 
 # Cleanup

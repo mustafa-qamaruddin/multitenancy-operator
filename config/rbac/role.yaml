@@ -5,7 +5,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - ""
+  - multitenancy-management.example.com
   resources:
   - configmaps
   verbs:

@@ -28,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
+	"github.com/go-logr/logr"
 	multitenancymanagementv1 "github.com/mustafa-qamaruddin/multitenancy-operator/api/v1"
 	v1 "github.com/mustafa-qamaruddin/multitenancy-operator/api/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -56,8 +57,9 @@ type TenantInfoReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *TenantInfoReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := logf.FromContext(ctx)
 
+	// Verify that the Custom Resource exists
+	log := logf.FromContext(ctx)
 	tenantInfo := &v1.TenantInfo{}
 	err := r.Get(ctx, req.NamespacedName, tenantInfo)
 	if err != nil {
@@ -70,77 +72,19 @@ func (r *TenantInfoReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	// Step 1: Track current tenants
+	// Track the Tenants from the Custom Resource
 	currentTenantIDs := make(map[string]bool)
-	for _, tenant := range tenantInfo.Spec.Tenants {
-		currentTenantIDs[tenant.TenantID] = true
 
-		// Create or update ConfigMap
-		cmName := fmt.Sprintf("tenant-%s-config", tenant.TenantID)
-		cm := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      cmName,
-				Namespace: req.Namespace,
-			},
-			Data: map[string]string{
-				"tenantID":      tenant.TenantID,
-				"webserviceURL": tenant.WebserviceURL,
-			},
-		}
-		if err := ctrl.SetControllerReference(tenantInfo, cm, r.Scheme); err != nil {
-			log.Error(err, "Failed to set controller reference")
-			return ctrl.Result{}, err
-		}
-
-		found := &corev1.ConfigMap{}
-		err := r.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
-		if err != nil && apierrors.IsNotFound(err) {
-			log.Info("Creating ConfigMap for tenant", "tenantID", tenant.TenantID)
-			if err := r.Create(ctx, cm); err != nil {
-				log.Error(err, "Failed to create ConfigMap", "tenantID", tenant.TenantID)
-				return ctrl.Result{}, err
-			}
-		} else if err == nil && !reflect.DeepEqual(found.Data, cm.Data) {
-			found.Data = cm.Data
-			log.Info("Updating ConfigMap for tenant", "tenantID", tenant.TenantID)
-			if err := r.Update(ctx, found); err != nil {
-				log.Error(err, "Failed to update ConfigMap", "tenantID", tenant.TenantID)
-				return ctrl.Result{}, err
-			}
-		} else if err != nil {
-			log.Error(err, "Failed to get ConfigMap")
-			return ctrl.Result{}, err
-		}
-	}
-
-	// Step 2: List all ConfigMaps owned by this TenantInfo and delete the ones no longer needed
-	var childCMs corev1.ConfigMapList
-	if err := r.List(ctx, &childCMs, client.InNamespace(req.Namespace)); err != nil {
-		log.Error(err, "Failed to list child ConfigMaps")
+	// Step 1: Update or Insert and Track current tenants
+	_, err = r.upsert(ctx, req, log, currentTenantIDs, tenantInfo)
+	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// Manually filter by ownerReference UID since fake client doesn't support field selectors
-	var filteredChildCMs []corev1.ConfigMap
-	for _, cm := range childCMs.Items {
-		for _, ref := range cm.OwnerReferences {
-			if ref.UID == tenantInfo.UID {
-				filteredChildCMs = append(filteredChildCMs, cm)
-				break
-			}
-		}
-	}
-
-	for _, cm := range filteredChildCMs {
-		tenantID := strings.TrimPrefix(cm.Name, "tenant-")
-		tenantID = strings.TrimSuffix(tenantID, "-config")
-		if _, exists := currentTenantIDs[tenantID]; !exists {
-			log.Info("Deleting orphaned ConfigMap", "name", cm.Name)
-			if err := r.Delete(ctx, &cm); err != nil {
-				log.Error(err, "Failed to delete ConfigMap", "name", cm.Name)
-				return ctrl.Result{}, err
-			}
-		}
+	// Step 2: List all ConfigMaps owned by this TenantInfo and delete the ones no longer needed
+	_, err = r.delete(ctx, req, log, currentTenantIDs, tenantInfo)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -162,4 +106,93 @@ func (r *TenantInfoReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&multitenancymanagementv1.TenantInfo{}).
 		Named("tenantinfo").
 		Complete(r)
+}
+
+func (r *TenantInfoReconciler) upsert(
+	ctx context.Context, req ctrl.Request, log logr.Logger, currentTenantIDs map[string]bool, tenantInfo *v1.TenantInfo,
+) (ctrl.Result, error) {
+
+	// Loop through tenants Array and create a configMap per Tenant
+	for _, tenant := range tenantInfo.Spec.Tenants {
+		currentTenantIDs[tenant.TenantID] = true
+
+		// Create or update ConfigMap
+		cmName := fmt.Sprintf("tenant-%s-config", tenant.TenantID)
+		cm := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      cmName,
+				Namespace: req.Namespace,
+			},
+			Data: map[string]string{
+				"tenantID":      tenant.TenantID,
+				"webserviceURL": tenant.WebserviceURL,
+			},
+		}
+
+		// Mark the owner of the ConfigMap
+		if err := ctrl.SetControllerReference(tenantInfo, cm, r.Scheme); err != nil {
+			log.Error(err, "Failed to set controller reference")
+			return ctrl.Result{}, err
+		}
+
+		// Create or Update if found
+		found := &corev1.ConfigMap{}
+		err := r.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
+		if err != nil && apierrors.IsNotFound(err) {
+			log.Info("Creating ConfigMap for tenant", "tenantID", tenant.TenantID)
+			if err := r.Create(ctx, cm); err != nil {
+				log.Error(err, "Failed to create ConfigMap", "tenantID", tenant.TenantID)
+				return ctrl.Result{}, err
+			}
+		} else if err == nil && !reflect.DeepEqual(found.Data, cm.Data) {
+			found.Data = cm.Data
+			log.Info("Updating ConfigMap for tenant", "tenantID", tenant.TenantID)
+			if err := r.Update(ctx, found); err != nil {
+				log.Error(err, "Failed to update ConfigMap", "tenantID", tenant.TenantID)
+				return ctrl.Result{}, err
+			}
+		} else if err != nil {
+			log.Error(err, "Failed to get ConfigMap")
+			return ctrl.Result{}, err
+		}
+	}
+	return ctrl.Result{}, nil
+}
+
+func (r *TenantInfoReconciler) delete(
+	ctx context.Context, req ctrl.Request, log logr.Logger, currentTenantIDs map[string]bool, tenantInfo *v1.TenantInfo,
+) (ctrl.Result, error) {
+
+	// List all ConfigMaps in Current Namespace
+	var childCMs corev1.ConfigMapList
+	if err := r.List(ctx, &childCMs, client.InNamespace(req.Namespace)); err != nil {
+		log.Error(err, "Failed to list child ConfigMaps")
+		return ctrl.Result{}, err
+	}
+
+	// Manually filter by ownerReference UID since e2e client doesn't support field selectors
+	var filteredChildCMs []corev1.ConfigMap
+	for _, cm := range childCMs.Items {
+		for _, ref := range cm.OwnerReferences {
+			if ref.UID == tenantInfo.UID {
+				filteredChildCMs = append(filteredChildCMs, cm)
+				break
+			}
+		}
+	}
+
+	// Delete the ConfigMaps owned by this controller that were removed
+	for _, cm := range filteredChildCMs {
+		tenantID := strings.TrimPrefix(cm.Name, "tenant-")
+		tenantID = strings.TrimSuffix(tenantID, "-config")
+		if _, exists := currentTenantIDs[tenantID]; !exists {
+			log.Info("Deleting orphaned ConfigMap", "name", cm.Name)
+			if err := r.Delete(ctx, &cm); err != nil {
+				log.Error(err, "Failed to delete ConfigMap", "name", cm.Name)
+				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	return ctrl.Result{}, nil
 }

@@ -11,3 +11,5 @@ spec:
       webserviceURL: https://service.tenant-999.example.com
     - tenantID: tenant-111
       webserviceURL: https://service.tenant-111.example.com
+    - tenantID: tenant-777
+      webserviceURL: https://service.tenant-777.example.com

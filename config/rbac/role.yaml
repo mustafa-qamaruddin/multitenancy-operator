@@ -5,12 +5,15 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - multitenancy-management.example.com
+  - ""
   resources:
   - configmaps
   verbs:
+  - create
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - multitenancy-management.example.com

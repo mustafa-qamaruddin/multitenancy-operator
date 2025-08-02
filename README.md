@@ -63,15 +63,6 @@ kubectl get tenantinfoes -A
 kubectl delete tenantinfoes/tenantinfo-sample
 ```
 
-## Cleanup
-
-This section uninstalls all the CRDs and RBAC settings that were installed during the setup. Run this to clean your cluster after testing.
-
-```shell
-# Remove all CRDs and associated RBAC resources created by the operator
-make uninstall
-```
-
 ## Tests
 
 This section shows how to run the automated tests 
@@ -91,7 +82,68 @@ go test ./...
 go test ./internal/controller/...
 ```
 
-## KubeBuilder Default README.md
+## Deployment
+
+Docker Image
+
+build image
+make docker-build docker-push IMG=mqu89/kubernetes-multitenancy-operator:v1.0.1
+
+image can be found in:
+https://hub.docker.com/repository/docker/mqu89/kubernetes-multitenancy-operator/general
+
+<!-- Install Cert Manager
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml -->
+
+Deploy image
+ make deploy IMG=mqu89/kubernetes-multitenancy-operator:v1.0.1
+
+Debugging for errors:
+kubectl logs -n multitenancy-operator-system deploy/multitenancy-operator-controller-manager -c manager
+
+Error:
+2025-08-02T16:39:26Z    ERROR   controller-runtime.cache.UnhandledError Failed to watch {"reflector": "pkg/mod/k8s.io/client-go@v0.33.0/tools/cache/reflector.go:285", "type": "*v1.ConfigMap", "error": "failed to list *v1.ConfigMap: configmaps is forbidden: User \"system:serviceaccount:multitenancy-operator-system:multitenancy-operator-controller-manager\" cannot list resource \"configmaps\" in API group \"\" at the cluster scope"}
+
+## Deploy Commands Demystification
+
+```shell
+
+$ make deploy IMG=mqu89/kubernetes-multitenancy-operator:v1
+
+/Users/mustafa/IdeaProjects/multitenancy-operator/bin/controller-gen rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+cd config/manager && /Users/mustafa/IdeaProjects/multitenancy-operator/bin/kustomize edit set image controller=mqu89/kubernetes-multitenancy-operator:v1
+/Users/mustafa/IdeaProjects/multitenancy-operator/bin/kustomize build config/default | kubectl apply -f -
+namespace/multitenancy-operator-system created
+customresourcedefinition.apiextensions.k8s.io/tenantinfoes.multitenancy-management.example.com created
+serviceaccount/multitenancy-operator-controller-manager created
+role.rbac.authorization.k8s.io/multitenancy-operator-leader-election-role created
+clusterrole.rbac.authorization.k8s.io/multitenancy-operator-manager-role created
+clusterrole.rbac.authorization.k8s.io/multitenancy-operator-metrics-auth-role created
+clusterrole.rbac.authorization.k8s.io/multitenancy-operator-metrics-reader created
+clusterrole.rbac.authorization.k8s.io/multitenancy-operator-tenantinfo-admin-role created
+clusterrole.rbac.authorization.k8s.io/multitenancy-operator-tenantinfo-editor-role created
+clusterrole.rbac.authorization.k8s.io/multitenancy-operator-tenantinfo-viewer-role created
+rolebinding.rbac.authorization.k8s.io/multitenancy-operator-leader-election-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/multitenancy-operator-manager-rolebinding created
+clusterrolebinding.rbac.authorization.k8s.io/multitenancy-operator-metrics-auth-rolebinding created
+service/multitenancy-operator-controller-manager-metrics-service created
+deployment.apps/multitenancy-operator-controller-manager created
+
+```
+
+## Cleanup
+
+This section uninstalls all the CRDs and RBAC settings that were installed during the setup. Run this to clean your cluster after testing.
+
+```shell
+# Remove all CRDs and associated RBAC resources created by the operator
+make uninstall
+
+# Remove the Operator image
+make undeploy
+```
+
+## Default KubeBuilder README.md
 
 ## Getting Started
 

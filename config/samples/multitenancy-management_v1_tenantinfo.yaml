@@ -13,3 +13,27 @@ spec:
       webserviceURL: https://service.tenant-111.example.com
     - tenantID: tenant-777
       webserviceURL: https://service.tenant-777.example.com
+    - tenantID: tenant-888
+      webserviceURL: https://service.tenant-888.example.com
+    - tenantID: tenant-9990
+      webserviceURL: https://service.tenant-9990.example.com
+    - tenantID: tenant-1110
+      webserviceURL: https://service.tenant-1110.example.com
+    - tenantID: tenant-7770
+      webserviceURL: https://service.tenant-7770.example.com
+    - tenantID: tenant-8880
+      webserviceURL: https://service.tenant-8880.example.com
+    - tenantID: tenant-1234
+      webserviceURL: https://service.tenant-1234.example.com
+    - tenantID: tenant-456
+      webserviceURL: https://service.tenant-456.example.com
+    - tenantID: tenant-789
+      webserviceURL: https://service.tenant-789.example.com
+    - tenantID: tenant-000
+      webserviceURL: https://service.tenant-000.example.com
+    - tenantID: tenant-0909
+      webserviceURL: https://service.tenant-0909.example.com
+    - tenantID: tenant-66666
+      webserviceURL: https://service.tenant-66666.example.com
+    - tenantID: tenant-1111111
+      webserviceURL: https://service.tenant-1111111.example.com

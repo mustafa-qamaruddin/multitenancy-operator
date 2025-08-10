@@ -131,6 +131,83 @@ deployment.apps/multitenancy-operator-controller-manager created
 
 ```
 
+## Monitoring
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm install monitoring prometheus-community/kube-prometheus-stack \
+  --namespace multitenancy-operator-system
+
+kube-prometheus-stack has been installed. Check its status by running:
+$   kubectl --namespace monitoring get pods -l "release=monitoring"
+
+NAME                                                   READY   STATUS    RESTARTS   AGE
+monitoring-kube-prometheus-operator-6cd8f7b5cc-dsq26   1/1     Running   0          114s
+monitoring-kube-state-metrics-585b45df98-dg9mc         1/1     Running   0          114s
+monitoring-prometheus-node-exporter-pdktr              1/1     Running   0          114s
+
+Get Grafana 'admin' user password by running:
+$     kubectl --namespace multitenancy-operator-system get secrets monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
+prom-operator
+
+Access Grafana local instance:
+$   export POD_NAME=$(kubectl --namespace multitenancy-operator-system get pod -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=monitoring" -oname)
+$   kubectl --namespace multitenancy-operator-system port-forward $POD_NAME 3000
+
+Forwarding from 127.0.0.1:3000 -> 3000
+Forwarding from [::1]:3000 -> 3000
+
+### Granting Permissions to Access Metrics
+Kubebuilder scaffolds a ClusterRole with the necessary read permissions under: config/rbac/metrics_reader_role.yaml
+This file contains the required RBAC rules to allow access to the metrics endpoint.
+
+This ClusterRole is only a helper. Kubebuilder does not scaffold a RoleBinding or ClusterRoleBinding by default.
+This is an intentional design choice to avoid:
+- Accidentally binding to the wrong service account,
+- Granting access in restricted environments,
+- Creating conflicts in multi-team or multi-tenant clusters.
+- Create a ClusterRoleBinding
+
+You can create the binding via kubectl:
+$ kubectl get serviceaccounts -n multitenancy-operator-system
+NAME                                       SECRETS   AGE
+default                                    0         7d6h
+multitenancy-operator-controller-manager   0         7d6h
+
+kubectl create clusterrolebinding multitenancy-operator-metrics-binding \
+  --clusterrole=multitenancy-operator-metrics-reader \
+  --serviceaccount=multitenancy-operator-system:multitenancy-operator-controller-manager
+
+Manually test the metrics endpoint:
+
+Generate a Token
+export TOKEN=$(kubectl create token multitenancy-operator-controller-manager -n multitenancy-operator-system)
+echo $TOKEN
+
+Launch Curl Pod
+kubectl run curl-metrics --rm -it --restart=Never --image=curlimages/curl:7.87.0 -n multitenancy-operator-system -- /bin/sh
+
+or if already exists
+kubectl delete pod curl-metrics -n multitenancy-operator-system --ignore-not-found
+
+
+Call Metrics Endpoint
+Inside the pod, use:
+curl -v -k -H "Authorization: Bearer $TOKEN" https://multitenancy-operator-controller-manager-metrics-service.multitenancy-operator-system.svc.cluster.local:8443/metrics
+
+Prometheus Configuration:
+$ kubectl get servicemonitors -n multitenancy-operator-system
+NAME                                                       AGE
+multitenancy-operator-controller-manager-metrics-monitor   6m13s
+
+Prometheus Operator by default, its RBAC rules are only enabled for the default and kube-system namespaces. Prometheus will only pick up ServiceMonitor in the namespaces it’s allowed to watch, requiring the release=monitoring label.
+
+helm upgrade monitoring prometheus-community/kube-prometheus-stack \
+  --namespace multitenancy-operator-system \
+  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
+  --set prometheus.prometheusSpec.namespaceSelector.any=true
+
 ## Cleanup
 
 This section uninstalls all the CRDs and RBAC settings that were installed during the setup. Run this to clean your cluster after testing.

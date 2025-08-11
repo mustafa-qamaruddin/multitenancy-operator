@@ -87,7 +87,7 @@ go test ./internal/controller/...
 Docker Image
 
 build image
-make docker-build docker-push IMG=mqu89/kubernetes-multitenancy-operator:v1.0.1
+make docker-build docker-push IMG=mqu89/kubernetes-multitenancy-operator:v1.0.2
 
 image can be found in:
 https://hub.docker.com/repository/docker/mqu89/kubernetes-multitenancy-operator/general
@@ -96,7 +96,7 @@ https://hub.docker.com/repository/docker/mqu89/kubernetes-multitenancy-operator/
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml -->
 
 Deploy image
- make deploy IMG=mqu89/kubernetes-multitenancy-operator:v1.0.1
+ make deploy IMG=mqu89/kubernetes-multitenancy-operator:v1.0.2
 
 Debugging for errors:
 kubectl logs -n multitenancy-operator-system deploy/multitenancy-operator-controller-manager -c manager
@@ -135,6 +135,7 @@ deployment.apps/multitenancy-operator-controller-manager created
 
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
+helm install monitoring prometheus-community/kube-prometheus-stack   --namespace monitoring --create-namespace
 
 helm install monitoring prometheus-community/kube-prometheus-stack \
   --namespace multitenancy-operator-system

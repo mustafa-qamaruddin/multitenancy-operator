@@ -7,33 +7,105 @@ metadata:
   name: tenantinfo-sample
 spec:
   tenants:
-    - tenantID: tenant-999
-      webserviceURL: https://service.tenant-999.example.com
-    - tenantID: tenant-111
-      webserviceURL: https://service.tenant-111.example.com
-    - tenantID: tenant-777
-      webserviceURL: https://service.tenant-777.example.com
-    - tenantID: tenant-888
-      webserviceURL: https://service.tenant-888.example.com
-    - tenantID: tenant-9990
-      webserviceURL: https://service.tenant-9990.example.com
-    - tenantID: tenant-1110
-      webserviceURL: https://service.tenant-1110.example.com
-    - tenantID: tenant-7770
-      webserviceURL: https://service.tenant-7770.example.com
-    - tenantID: tenant-8880
-      webserviceURL: https://service.tenant-8880.example.com
-    - tenantID: tenant-1234
-      webserviceURL: https://service.tenant-1234.example.com
-    - tenantID: tenant-456
-      webserviceURL: https://service.tenant-456.example.com
-    - tenantID: tenant-789
-      webserviceURL: https://service.tenant-789.example.com
-    - tenantID: tenant-000
-      webserviceURL: https://service.tenant-000.example.com
-    - tenantID: tenant-0909
-      webserviceURL: https://service.tenant-0909.example.com
-    - tenantID: tenant-66666
-      webserviceURL: https://service.tenant-66666.example.com
-    - tenantID: tenant-1111111
-      webserviceURL: https://service.tenant-1111111.example.com
+    - tenantID: tenant-1
+      webserviceURL: https://service.tenant-1.example.com
+    - tenantID: tenant-2
+      webserviceURL: https://service.tenant-2.example.com
+    - tenantID: tenant-3
+      webserviceURL: https://service.tenant-3.example.com
+    - tenantID: tenant-4
+      webserviceURL: https://service.tenant-4.example.com
+    - tenantID: tenant-5
+      webserviceURL: https://service.tenant-5.example.com
+    - tenantID: tenant-6
+      webserviceURL: https://service.tenant-6.example.com
+    - tenantID: tenant-7
+      webserviceURL: https://service.tenant-7.example.com
+    - tenantID: tenant-8
+      webserviceURL: https://service.tenant-8.example.com
+    - tenantID: tenant-9
+      webserviceURL: https://service.tenant-9.example.com
+    - tenantID: tenant-10
+      webserviceURL: https://service.tenant-10.example.com
+    - tenantID: tenant-11
+      webserviceURL: https://service.tenant-11.example.com
+    - tenantID: tenant-12
+      webserviceURL: https://service.tenant-12.example.com
+    - tenantID: tenant-13
+      webserviceURL: https://service.tenant-13.example.com
+    - tenantID: tenant-14
+      webserviceURL: https://service.tenant-14.example.com
+    - tenantID: tenant-15
+      webserviceURL: https://service.tenant-15.example.com
+    - tenantID: tenant-16
+      webserviceURL: https://service.tenant-16.example.com
+    - tenantID: tenant-17
+      webserviceURL: https://service.tenant-17.example.com
+    - tenantID: tenant-18
+      webserviceURL: https://service.tenant-18.example.com
+    - tenantID: tenant-19
+      webserviceURL: https://service.tenant-19.example.com
+    - tenantID: tenant-20
+      webserviceURL: https://service.tenant-20.example.com
+    - tenantID: tenant-21
+      webserviceURL: https://service.tenant-21.example.com
+    - tenantID: tenant-22
+      webserviceURL: https://service.tenant-22.example.com
+    - tenantID: tenant-23
+      webserviceURL: https://service.tenant-23.example.com
+    - tenantID: tenant-24
+      webserviceURL: https://service.tenant-24.example.com
+    - tenantID: tenant-25
+      webserviceURL: https://service.tenant-25.example.com
+    - tenantID: tenant-26
+      webserviceURL: https://service.tenant-26.example.com
+    - tenantID: tenant-27
+      webserviceURL: https://service.tenant-27.example.com
+    - tenantID: tenant-28
+      webserviceURL: https://service.tenant-28.example.com
+    - tenantID: tenant-29
+      webserviceURL: https://service.tenant-29.example.com
+    - tenantID: tenant-30
+      webserviceURL: https://service.tenant-30.example.com
+    - tenantID: tenant-31
+      webserviceURL: https://service.tenant-31.example.com
+    - tenantID: tenant-32
+      webserviceURL: https://service.tenant-32.example.com
+    - tenantID: tenant-33
+      webserviceURL: https://service.tenant-33.example.com
+    - tenantID: tenant-34
+      webserviceURL: https://service.tenant-34.example.com
+    - tenantID: tenant-35
+      webserviceURL: https://service.tenant-35.example.com
+    - tenantID: tenant-36
+      webserviceURL: https://service.tenant-36.example.com
+    - tenantID: tenant-37
+      webserviceURL: https://service.tenant-37.example.com
+    - tenantID: tenant-38
+      webserviceURL: https://service.tenant-38.example.com
+    - tenantID: tenant-39
+      webserviceURL: https://service.tenant-39.example.com
+    - tenantID: tenant-40
+      webserviceURL: https://service.tenant-40.example.com
+    - tenantID: tenant-41
+      webserviceURL: https://service.tenant-41.example.com
+    - tenantID: tenant-42
+      webserviceURL: https://service.tenant-42.example.com
+    - tenantID: tenant-43
+      webserviceURL: https://service.tenant-43.example.com
+    - tenantID: tenant-44
+      webserviceURL: https://service.tenant-44.example.com
+    - tenantID: tenant-45
+      webserviceURL: https://service.tenant-45.example.com
+    - tenantID: tenant-46
+      webserviceURL: https://service.tenant-46.example.com
+    - tenantID: tenant-47
+      webserviceURL: https://service.tenant-47.example.com
+    - tenantID: tenant-48
+      webserviceURL: https://service.tenant-48.example.com
+    - tenantID: tenant-49
+      webserviceURL: https://service.tenant-49.example.com
+    - tenantID: tenant-50
+      webserviceURL: https://service.tenant-50.example.com
+    - tenantID: tenant-51
+      webserviceURL: https

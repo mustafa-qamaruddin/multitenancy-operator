@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: mqu89/kubernetes-multitenancy-operator
-  newTag: v1.0.1
+  newTag: v1.0.2

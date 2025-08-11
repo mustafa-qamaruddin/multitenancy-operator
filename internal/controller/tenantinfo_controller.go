@@ -45,7 +45,7 @@ type TenantInfoReconciler struct {
 // +kubebuilder:rbac:groups=multitenancy-management.example.com,resources=tenantinfoes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=multitenancy-management.example.com,resources=tenantinfoes/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=multitenancy-management.example.com,resources=tenantinfoes/finalizers,verbs=update
-// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
